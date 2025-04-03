@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -40,21 +41,28 @@ public class PatientServiceImpl implements PatientService {
 
 	@Override
 	public PatientResponseDTO updatePatient(UUID id, PatientRequestDTO patientRequestDTO) {
-		
+
 		Patient patient = patientRepository.findById(id)
 				.orElseThrow(() -> new PatientNotFoundException("Patient not found"));
-		
-		if (patientRepository.existsByEmailAndIdNot(patientRequestDTO.getEmail(),id)) {
+
+		if (patientRepository.existsByEmailAndIdNot(patientRequestDTO.getEmail(), id)) {
 			throw new EmailAlreadyExistsException("Email already exists");
 		}
-		
+
 		patient.setName(patientRequestDTO.getName());
 		patient.setAddress(patientRequestDTO.getAddress());
 		patient.setEmail(patientRequestDTO.getEmail());
 		patient.setDateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
-		
+
 		Patient updatePatient = patientRepository.save(patient);
-		
+
 		return PatientMapper.toDTO(updatePatient);
+	}
+
+	@Override
+	public void deletePatient(UUID id) {
+		patientRepository.findById(id).orElseThrow(()->new PatientNotFoundException("Invalid Patient id"));
+		patientRepository.deleteById(id);
+
 	}
 }
