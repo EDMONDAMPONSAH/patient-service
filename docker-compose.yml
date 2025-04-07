@@ -1,0 +1,97 @@
+#
+#services:
+#  postgres:
+#    image: postgres:latest
+#    container_name: patient-service-db
+#    environment:
+#      POSTGRES_DB: patient-service-db
+#      POSTGRES_USER: root
+#      POSTGRES_PASSWORD: root
+#    ports:
+#      - "5000:5432"
+#    volumes:
+#      - D:/docker-volumes/patient-service-db:/var/lib/postgresql/data
+#    networks:
+#      - internal  # Define network here
+#
+#networks:
+#  internal:  # Specify the network
+#    driver: bridge  # Use the default bridge network driver
+
+
+#services:
+#  postgres:
+#    image: postgres:latest
+#    container_name: patient-service-db
+#    environment:
+#      POSTGRES_DB: patient-service-db
+#      POSTGRES_USER: root
+#      POSTGRES_PASSWORD: root
+#    ports:
+#      - "5000:5432"
+#    volumes:
+#      - D:/docker-volumes/patient-service-db:/var/lib/postgresql/data
+#    networks:
+#      - internal
+#
+#  # -------------------- ADDED patient-service container ---------------------
+#  patient-service:
+#    build: .
+#    image: patient-service:latest  # <-- USING YOUR EXISTING IMAGE
+#    container_name: patient-service
+#    ports:
+#      - "4000:4000"
+#    depends_on:
+#      - postgres
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://patient-service-db:5432/db
+#      SPRING_DATASOURCE_USERNAME: root
+#      SPRING_DATASOURCE_PASSWORD: root
+#      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+#      SPRING_SQL_INIT_MODE: always
+#    networks:
+#      - internal
+#  # --------------------------------------------------------------------------
+#
+#networks:
+#  internal:
+#    driver: bridge
+
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: patient-service-db
+    environment:
+      POSTGRES_DB: patient-service-db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5000:5432"
+    volumes:
+      - D:/docker-volumes/patient-service-db:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  patient-service:
+    build: .
+    image: patient-service:latest  
+    container_name: patient-service
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://patient-service-db:5432/patient-service-db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
