@@ -4,6 +4,7 @@ import com.edmond.patient_service.dto.PatientRequestDTO;
 import com.edmond.patient_service.dto.PatientResponseDTO;
 import com.edmond.patient_service.exception.EmailAlreadyExistsException;
 import com.edmond.patient_service.exception.PatientNotFoundException;
+import com.edmond.patient_service.grpc.BillingServiceGrpcClient;
 import com.edmond.patient_service.mapper.PatientMapper;
 import com.edmond.patient_service.model.Patient;
 import com.edmond.patient_service.repository.PatientRepository;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class PatientServiceImpl implements PatientService {
 
 	private final PatientRepository patientRepository;
+	private final BillingServiceGrpcClient billingServiceGrpcClient;
 
 	@Override
 	public List<PatientResponseDTO> getPatients() {
