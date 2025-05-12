@@ -38,6 +38,10 @@ public class PatientServiceImpl implements PatientService {
 		}
 
 		Patient newPatient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
+
+		billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(), newPatient.getName(),
+				newPatient.getEmail());
+
 		return PatientMapper.toDTO(newPatient);
 	}
 
@@ -63,7 +67,7 @@ public class PatientServiceImpl implements PatientService {
 
 	@Override
 	public void deletePatient(UUID id) {
-		patientRepository.findById(id).orElseThrow(()->new PatientNotFoundException("Invalid Patient id"));
+		patientRepository.findById(id).orElseThrow(() -> new PatientNotFoundException("Invalid Patient id"));
 		patientRepository.deleteById(id);
 
 	}
