@@ -58,6 +58,49 @@
 #    driver: bridge
 
 
+#version: '3.8'
+#
+#services:
+#  postgres:
+#    image: postgres:latest
+#    container_name: patient-service-db
+#    environment:
+#      POSTGRES_DB: patient-service-db
+#      POSTGRES_USER: root
+#      POSTGRES_PASSWORD: root
+#    ports:
+#      - "5000:5432"
+#    volumes:
+#      - D:/docker-volumes/patient-service-db:/var/lib/postgresql/data
+#    networks:
+#      - internal
+#
+#  patient-service:
+#    build: .
+#    image: patient-service:latest  
+#    container_name: patient-service
+#    ports:
+#      - "4000:4000"
+#    depends_on:
+#      - postgres
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://patient-service-db:5432/patient-service-db
+#      SPRING_DATASOURCE_USERNAME: root
+#      SPRING_DATASOURCE_PASSWORD: root
+#      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+#      SPRING_SQL_INIT_MODE: always
+#      BILLING_SERVICE_ADDRESS: billing-service
+#      BILLING_SERVICE_GRPC_PORT: 9001
+#    networks:
+#      - internal
+#
+#networks:
+#  internal:
+#    driver: bridge
+
+
+ # -------------------- ADDED KAFKA container ---------------------
+
 version: '3.8'
 
 services:
@@ -83,6 +126,7 @@ services:
       - "4000:4000"
     depends_on:
       - postgres
+      - kafka
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://patient-service-db:5432/patient-service-db
       SPRING_DATASOURCE_USERNAME: root
@@ -94,6 +138,38 @@ services:
     networks:
       - internal
 
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+    networks:
+      - internal
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9094
+      KAFKA_CLUSTERS_0_ZOOKEEPER: ""
+    depends_on:
+      - kafka
+    networks:
+      - internal
+
 networks:
   internal:
-    external: true
+    driver: bridge
+
